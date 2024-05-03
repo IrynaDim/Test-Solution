@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/School
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: 1234
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+#  messages:
+#    basename: messages
+#    encoding: UTF-8
+#    # Предпочтительный язык сообщений, если не найдено совпадающих сообщений для текущего языка
+#    fallback-to-system-locale: false
+#    # Язык по умолчанию
+#    locale: en_RU
+
+logging:
+  level:
+    root: info
+    org:
+      springframework: info
+  file:
+    name: ./logs/dev.log
+
+# Variable age.
+# Note that this variable should be defined in another file, for example, application-properties.yaml,
+# where all environment variables are stored. However, in this example, it is contained in a single file to simplify the task.
+# It is recommended to separate all variables into individual files for a cleaner and more structured configuration.
+age: 18
