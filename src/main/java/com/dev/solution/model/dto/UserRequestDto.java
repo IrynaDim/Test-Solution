@@ -1,7 +1,8 @@
 package com.dev.solution.model.dto;
 
-import com.dev.solution.utils.validation.BirthDateValidation;
-import com.dev.solution.utils.validation.EmailValidation;
+import com.dev.solution.utils.annotation.BirthDateValidation;
+import com.dev.solution.utils.annotation.EmailValidation;
+import com.dev.solution.utils.annotation.NullOrNotBlank;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -27,9 +28,9 @@ public class UserRequestDto {
     @BirthDateValidation
     private LocalDate birthDate;
 
-    @NotBlank(message = "Address can not be empty.")
+    @NullOrNotBlank
     private String address;
 
-    @NotBlank(message = "Phone number can not be empty.")
+    @NullOrNotBlank
     private String phoneNumber;
 }

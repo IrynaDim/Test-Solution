@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExceptionResponse {
     private int status;
-    private String message;
+    private Object message;
     private String timeStamp;
     private String url;
 }

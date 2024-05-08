@@ -1,6 +1,7 @@
-package com.dev.solution.utils.validation;
+package com.dev.solution.utils.annotation;
 
 
+import com.dev.solution.utils.validation.EmailValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

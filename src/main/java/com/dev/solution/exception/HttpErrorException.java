@@ -6,10 +6,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class HttpErrorException extends RuntimeException {
-    private final int code;
+    private int code;
+    private Object messages;
 
-    public HttpErrorException(int code, String message) {
-        super(message);
+    public HttpErrorException(int code, Object messages) {
+        this.code = code;
+        this.messages = messages;
+    }
+
+    public HttpErrorException(int code) {
         this.code = code;
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
@@ -23,7 +24,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      **/
     @ExceptionHandler(value = HttpErrorException.class)
     public ResponseEntity<Object> handleHttpException(HttpErrorException exception, WebRequest request) {
-        return buildExceptionBody(exception.getMessage(), HttpStatus.valueOf(exception.getCode()), request);
+        return buildExceptionBody(exception.getMessages(), HttpStatus.valueOf(exception.getCode()), request);
     }
 
     /**
@@ -36,21 +37,20 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers,
             HttpStatusCode status,
             WebRequest request) {
-        StringBuilder errorMessageBuilder = new StringBuilder();
-        ex.getBindingResult().getFieldErrors().forEach(fieldError ->
-                errorMessageBuilder.append(fieldError.getDefaultMessage()).append("\n"));
-        String errorMessage = errorMessageBuilder.toString().trim();
-        return buildExceptionBody(errorMessage,
+        return buildExceptionBody(ex.getBindingResult().getFieldErrors().stream()
+                        .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                        .collect(Collectors.toList()),
                 HttpStatus.valueOf(status.value()),
                 request);
     }
 
-    private ResponseEntity<Object> buildExceptionBody(String message, HttpStatus httpStatus, WebRequest request) {
+    private ResponseEntity<Object> buildExceptionBody(Object message, HttpStatus httpStatus, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse();
-        exceptionResponse.setStatus(httpStatus.value());
         exceptionResponse.setMessage(message);
+        exceptionResponse.setStatus(httpStatus.value());
         exceptionResponse.setTimeStamp(LocalDateTime.now().toString());
         exceptionResponse.setUrl(request.getDescription(false).replace("uri=", ""));
+
         return ResponseEntity
                 .status(httpStatus)
                 .body(exceptionResponse);

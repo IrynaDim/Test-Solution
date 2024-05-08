@@ -11,6 +11,3 @@ public class SolutionApplication {
         SpringApplication.run(SolutionApplication.class, args);
     }
 }
-
-// todo read me
-//todo tests

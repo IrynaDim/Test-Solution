@@ -1,41 +1,39 @@
 package com.dev.solution.service.impl;
 
-import com.dev.solution.exception.AlreadyExists;
+import com.dev.solution.exception.AlreadyExistsException;
 import com.dev.solution.exception.ErrorMessage;
 import com.dev.solution.exception.NotFoundException;
-import com.dev.solution.exception.NotValidFields;
+import com.dev.solution.exception.NotValidFieldsException;
 import com.dev.solution.model.User;
 import com.dev.solution.model.dto.UserRequestDto;
 import com.dev.solution.model.dto.UserResponseDto;
 import com.dev.solution.repository.UserRepository;
 import com.dev.solution.service.UserService;
-import jakarta.validation.ConstraintViolation;
+import com.dev.solution.utils.validation.FieldsValidation;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final LocalValidatorFactoryBean validator;
     private final ModelMapper modelMapper;
+    private final FieldsValidation fieldsValidation;
 
     public UserServiceImpl(UserRepository userRepository,
-                           LocalValidatorFactoryBean validator,
-                           ModelMapper modelMapper) {
+                           ModelMapper modelMapper,
+                           FieldsValidation fieldsValidation) {
         this.userRepository = userRepository;
-        this.validator = validator;
         this.modelMapper = modelMapper;
+        this.fieldsValidation = fieldsValidation;
     }
 
     @Override
@@ -62,7 +60,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserResponseDto> findByDateBetween(LocalDate startDate, LocalDate endDate, Pageable pageable) {
         if (startDate.isAfter(endDate)) {
-            throw new NotValidFields("Start date must be before end date.");
+            throw new NotValidFieldsException("Start date must be before end date.");
         }
 
         Page<User> usersPage = userRepository.findByBirthDateBetween(startDate, endDate, pageable);
@@ -101,7 +99,7 @@ public class UserServiceImpl implements UserService {
      * @param fieldsToUpdate A Map containing the fields to update along with their new values.
      * @return The updated UserFullDto object containing the modified user information.
      * @throws NotFoundException        if no user with the provided ID is found in the repository.
-     * @throws NotValidFields           if any of the updated fields fail validation.
+     * @throws NotValidFieldsException  if any of the updated fields fail validation.
      * @throws IllegalArgumentException if the updated email or phone number already exists for another user.
      */
     @Override
@@ -112,7 +110,9 @@ public class UserServiceImpl implements UserService {
 
         UserRequestDto updatedFields = modelMapper.map(user, UserRequestDto.class);
         modelMapper.map(fieldsToUpdate, updatedFields);
-        validateFields(updatedFields);
+
+        fieldsValidation.validateFields(updatedFields);
+
         User userToUpdate = modelMapper.map(updatedFields, User.class);
         userToUpdate.setId(id);
 
@@ -128,25 +128,13 @@ public class UserServiceImpl implements UserService {
 
     private void checkEmailUnique(String email) {
         userRepository.findByEmail(email).ifPresent(u -> {
-            throw new AlreadyExists(ErrorMessage.USER_BY_EMAIL_EXIST + email);
+            throw new AlreadyExistsException(ErrorMessage.USER_BY_EMAIL_EXIST + email);
         });
     }
 
     private void checkPhoneUnique(String phone) {
         userRepository.findByPhoneNumber(phone).ifPresent(u -> {
-            throw new AlreadyExists(ErrorMessage.USER_BY_PHONE_NUMBER_EXIST + phone);
+            throw new AlreadyExistsException(ErrorMessage.USER_BY_PHONE_NUMBER_EXIST + phone);
         });
     }
-
-    private void validateFields(UserRequestDto updatedFields) {
-        Set<ConstraintViolation<Object>> violations = validator.validate(updatedFields);
-        if (!violations.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder(ErrorMessage.NOT_CORRECT_FIELD_NAME);
-            for (ConstraintViolation<Object> violation : violations) {
-                errorMessage.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append("; ");
-            }
-            throw new NotValidFields(errorMessage.toString());
-        }
-    }
-
 }

@@ -1,11 +1,14 @@
 package com.dev.solution.utils.validation;
 
+import com.dev.solution.utils.annotation.BirthDateValidation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
 
+@Setter
 public class DateValidator implements ConstraintValidator<BirthDateValidation, LocalDate> {
     @Value("${age}")
     private int age;
@@ -18,6 +21,6 @@ public class DateValidator implements ConstraintValidator<BirthDateValidation, L
     @Override
     public boolean isValid(LocalDate date, ConstraintValidatorContext constraintValidatorContext) {
         LocalDate eighteenYearsAgo = LocalDate.now().minusYears(age);
-        return date != null && date.isBefore(eighteenYearsAgo);
+        return date != null && (date.isBefore(eighteenYearsAgo) || date.isEqual(eighteenYearsAgo));
     }
 }

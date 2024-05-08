@@ -1,19 +1,12 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/School
+    url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: 1234
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: create-drop
-#  messages:
-#    basename: messages
-#    encoding: UTF-8
-#    # Предпочтительный язык сообщений, если не найдено совпадающих сообщений для текущего языка
-#    fallback-to-system-locale: false
-#    # Язык по умолчанию
-#    locale: en_RU
 
 logging:
   level:
